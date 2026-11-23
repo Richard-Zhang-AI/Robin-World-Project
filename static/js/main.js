@@ -255,7 +255,7 @@
     cam: {
       boxes: ["in_imgs", "enc_img", "enc_vis", "enc_ctx", "vlm_ctx", "vlm_s0", "vlm_trk", "dit", "geo_head", "out_geo1", "out_geo2", "cogt_skt", "cogt_fit", "cam_in", "cam_out"],
       wires: ["w-img-vis", "w-enc-vlm", "w-ctx-dit", "w-vlm-s0", "w-s0-trk", "w-dit-geo", "w-geo-sketch", "w-sketch-fit", "w-fit-vlm", "w-vlm-cam"],
-      color: "#fb7185",
+      color: "#9f3e52",
       title: "Path 1 · Camera Perception & Closed-Loop Feedback",
       meta: "I → ĉ ← w_F(E)·c^F  |  η = 0.85 Feedback (−41.9%)",
       desc: "Understanding predicts initial pose; DiT generates perspective field F; Camera-Field Fit refines roll/pitch via residual gating (60.65% Mean@1), while readback corrects camera commands.",
@@ -263,7 +263,7 @@
     geo: {
       boxes: ["in_imgs", "enc_img", "enc_vis", "enc_vae", "enc_ctx", "vlm_ctx", "vlm_s0", "dit", "geo_head", "out_geo1", "out_geo2", "geo_in"],
       wires: ["w-img-vis", "w-img-vae", "w-enc-vlm", "w-ctx-dit", "w-vae-dit", "w-vlm-s0", "w-dit-geo", "w-geo-3d"],
-      color: "#34d399",
+      color: "#2b7a5e",
       title: "Path 2 · Dense 3D Geometry & Intrinsic-Free Lifting",
       meta: "G = (F, ρ, N) → X_cam = d(p)·K⁻¹·p̃",
       desc: "Shared DiT attention jointly denoises perspective fields, inverse depth, and surface normals, lifting uncalibrated 3D point clouds without ground-truth intrinsics.",
@@ -271,7 +271,7 @@
     qa: {
       boxes: ["in_imgs", "in_q", "enc_cap", "enc_tok", "enc_img", "enc_vis", "enc_dino", "enc_ctx", "vlm_ctx", "vlm_s0", "vlm_trk", "dit", "geo_head", "out_geo1", "out_geo2", "cogt_skt", "cogt_fus", "qa_in", "qa_out"],
       wires: ["w-in-text", "w-img-vis", "w-img-dino", "w-enc-vlm", "w-ctx-dit", "w-vlm-s0", "w-s0-trk", "w-dino-fusion", "w-dit-geo", "w-geo-sketch", "w-sketch-fusion", "w-fusion-vlm", "w-vlm-qa"],
-      color: "#a78bfa",
+      color: "#5b4d96",
       title: "Path 3 · Spatial Reasoning via Chain of Geometric Thought",
       meta: "S' = S + tanh(α)·W_o·softmax(QKᵀ/√d + log(π(S)+ε))V(H)",
       desc: "Self-generated (F, ρ, N) maps are encoded on the 16×16 grid, combined with DINOv3 features, and selectively fused into Qwen3-VL (+8.10% on VSI-Bench).",
@@ -279,7 +279,7 @@
     sim: {
       boxes: ["in_imgs", "in_q", "in_cam", "in_pose", "in_time", "enc_cap", "enc_tok", "enc_img", "enc_vis", "enc_vae", "enc_ctx", "vlm_ctx", "vlm_s0", "rope", "dit", "rgb_head", "out_rgb", "sim_in", "sim_out"],
       wires: ["w-in-text", "w-img-vis", "w-img-vae", "w-enc-vlm", "w-ctx-dit", "w-vae-dit", "w-vlm-s0", "w-in-rope", "w-dit-rgb", "w-rgb-sim"],
-      color: "#38bdf8",
+      color: "#2563a8",
       title: "Path 4 · Controllable World Simulation",
       meta: "Îₖ = R_θ(Z, I, Cₖ, τₖ)  |  V̂ = R_θ(Z, V, {Cₖ}, t*, Ṽ)",
       desc: "Continuous trajectories condition SolarWM-H3 via 6-DoF RoPE; discrete jumps use V-JEPA 2.1 state Z (+7.74 dB cross-view); bullet-time anchors visible surfaces with 3D point clouds.",
@@ -454,37 +454,37 @@
   const TRAIN_STAGES = [
     {
       id: 1, num: "STAGE 1", title: "Camera Perception",
-      color: "#fb7185", bg: "rgba(251,113,133,.16)", fg: "#fecdd3", bd: "rgba(251,113,133,.45)",
+      color: "#9f3e52", bg: "rgba(159,62,82,.09)", fg: "#881337", bd: "rgba(159,62,82,.28)",
       modules: "Qwen3-VL Backbone (I₀ → c) · LoRA r=64", params: "615.3M params",
       datasets: ["Puffin-4M", "Puffin-Cam-15M"],
     },
     {
       id: 2, num: "STAGE 2", title: "Spatial Reasoning",
-      color: "#a78bfa", bg: "rgba(167,139,250,.16)", fg: "#ddd6fe", bd: "rgba(167,139,250,.45)",
+      color: "#5b4d96", bg: "rgba(91,77,150,.09)", fg: "#4c1d95", bd: "rgba(91,77,150,.28)",
       modules: "VLM (r=32) + Frozen DINOv3 + Spatial Fusion", params: "45.2M SGF",
       datasets: ["VSI-590K", "CoVT", "Puffin-4M"],
     },
     {
       id: 3, num: "STAGE 3", title: "Generator Alignment",
-      color: "#38bdf8", bg: "rgba(56,189,248,.16)", fg: "#bae6fd", bd: "rgba(56,189,248,.45)",
+      color: "#2563a8", bg: "rgba(37,99,168,.09)", fg: "#1e3a8a", bd: "rgba(37,99,168,.28)",
       modules: "33B SolarWM-H3 DiT (Layer-50 + Cam RoPE) · r=384", params: "2.08B params",
       datasets: ["Puffin-Traj-1M", "RealEstate10K"],
     },
     {
       id: 4, num: "STAGE 4", title: "Dense 3D Geometry",
-      color: "#34d399", bg: "rgba(52,211,153,.16)", fg: "#a7f3d0", bd: "rgba(52,211,153,.45)",
+      color: "#2b7a5e", bg: "rgba(43,122,94,.09)", fg: "#14532d", bd: "rgba(43,122,94,.28)",
       modules: "DiT Geo Head (F, ρ, N) · r=64 + Map Emb.", params: "681.1M params",
       datasets: ["SceneNet-RGBD", "ARKitScenes", "OmniWorld-Game", "TartanAir", "TUM RGB-D", "vKITTI 2", "LaMAR", "MegaDepth"],
     },
     {
       id: 5, num: "STAGE 5", title: "World Simulation",
-      color: "#22d3ee", bg: "rgba(34,211,238,.16)", fg: "#a5f3fc", bd: "rgba(34,211,238,.45)",
+      color: "#0e7490", bg: "rgba(14,116,144,.09)", fg: "#155e75", bd: "rgba(14,116,144,.28)",
       modules: "V-JEPA 2.1 Predictor + State Bridges + 3D Branch", params: "92.4M + 268.6M + 2.9M",
       datasets: ["Static Orbits", "DL3DV", "ScanNet", "RealEstate10K", "OmniWorld-Game", "uCO3D"],
     },
     {
       id: 6, num: "STAGE 6", title: "CoGT Closed Loop",
-      color: "#f59e0b", bg: "rgba(245,158,11,.16)", fg: "#fde68a", bd: "rgba(245,158,11,.45)",
+      color: "#b45309", bg: "rgba(180,83,9,.09)", fg: "#78350f", bd: "rgba(180,83,9,.28)",
       modules: "Map Encoder + Spatial Fusion + Field Fit Loop", params: "26.8M + 45.2M",
       datasets: ["VSI-590K", "CoVT", "Puffin-4M", "Puffin-Cam-15M"],
     },
@@ -955,7 +955,7 @@
              </div>
            </div>`
         : (it.meta
-          ? `<div class="sr-scale-box"><div class="sr-scale-row" style="margin:0"><span>${it.meta.left}</span><b style="color:#6ee7b7">${it.meta.right}</b></div></div>`
+          ? `<div class="sr-scale-box"><div class="sr-scale-row" style="margin:0"><span>${it.meta.left}</span><b style="color:#15803d">${it.meta.right}</b></div></div>`
           : "");
       return `
         <div class="sr-item">
@@ -1038,7 +1038,7 @@
     }
     ctx.clearRect(0, 0, w, h);
 
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.10)";
+    ctx.strokeStyle = "rgba(15, 23, 42, 0.08)";
     ctx.lineWidth = 1 * dpr;
     for (let x = 0; x <= w; x += Math.round(w / 6)) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
@@ -1078,14 +1078,14 @@
       const frac = pos - idx;
       const curAng = angs[idx] + (angs[idx + 1] - angs[idx]) * frac;
 
-      ctx.strokeStyle = "rgba(148, 163, 184, 0.22)";
+      ctx.strokeStyle = "rgba(15, 23, 42, 0.22)";
       ctx.lineWidth = 2 * dpr;
       ctx.setLineDash([4 * dpr, 4 * dpr]);
       ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.stroke();
       ctx.setLineDash([]);
 
       // Draw swept arc up to current turn
-      ctx.strokeStyle = "#38bdf8";
+      ctx.strokeStyle = "#1d4ed8";
       ctx.lineWidth = 3.2 * dpr;
       ctx.beginPath();
       const samples = 48;
@@ -1101,7 +1101,7 @@
       ctx.stroke();
 
       // Start marker
-      ctx.fillStyle = "#e8623e";
+      ctx.fillStyle = "#b91c1c";
       ctx.beginPath();
       ctx.arc(cx + Math.cos(angs[0]) * rad, cy + Math.sin(angs[0]) * rad, 4.5 * dpr, 0, Math.PI * 2);
       ctx.fill();
@@ -1110,18 +1110,18 @@
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(curAng);
-      ctx.fillStyle = "rgba(56, 189, 248, 0.24)";
+      ctx.fillStyle = "rgba(37, 99, 235, 0.20)";
       ctx.beginPath();
       ctx.moveTo(0, 0);
       ctx.lineTo(rad * 0.92, -rad * 0.36);
       ctx.lineTo(rad * 0.92, rad * 0.36);
       ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = "#0f172a";
       ctx.beginPath(); ctx.arc(0, 0, 5 * dpr, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
 
-      ctx.fillStyle = "#94a3b8";
+      ctx.fillStyle = "#475569";
       ctx.font = `${10.5 * dpr}px JetBrains Mono, monospace`;
       ctx.fillText("— GT Orientation Sweep (In-Place)", 10 * dpr, h - 10 * dpr);
       return;
@@ -1138,7 +1138,7 @@
     // Full GT path dashed outline
     ctx.save();
     ctx.setLineDash([5 * dpr, 5 * dpr]);
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.32)";
+    ctx.strokeStyle = "rgba(15, 23, 42, 0.26)";
     ctx.lineWidth = 2.2 * dpr;
     ctx.beginPath();
     gt.forEach((p, idx) => {
@@ -1151,8 +1151,8 @@
     // Progressive active GT path up to current playback
     const nDraw = Math.max(1, Math.min(gt.length, Math.round(progress * (gt.length - 1)) + 1));
     const grad = ctx.createLinearGradient(0, h, w, 0);
-    grad.addColorStop(0, "#38bdf8");
-    grad.addColorStop(1, "#34d399");
+    grad.addColorStop(0, "#1d4ed8");
+    grad.addColorStop(1, "#0f766e");
     ctx.strokeStyle = grad;
     ctx.lineWidth = 3.4 * dpr;
     ctx.beginPath();
@@ -1163,7 +1163,7 @@
     ctx.stroke();
 
     const [sx, sy] = mapPt(gt[0]);
-    ctx.fillStyle = "#e8623e";
+    ctx.fillStyle = "#b91c1c";
     ctx.beginPath(); ctx.arc(sx, sy, 4.5 * dpr, 0, Math.PI * 2); ctx.fill();
 
     const curIdx = nDraw - 1;
@@ -1178,18 +1178,18 @@
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(ang);
-    ctx.fillStyle = "rgba(56, 189, 248, 0.28)";
+    ctx.fillStyle = "rgba(37, 99, 235, 0.22)";
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(22 * dpr, -10 * dpr);
     ctx.lineTo(22 * dpr, 10 * dpr);
     ctx.closePath();
     ctx.fill();
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#0f172a";
     ctx.beginPath(); ctx.arc(0, 0, 5 * dpr, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
 
-    ctx.fillStyle = "#94a3b8";
+    ctx.fillStyle = "#475569";
     ctx.font = `${10.5 * dpr}px JetBrains Mono, monospace`;
     ctx.fillText("— GT Camera Trajectory (Active)   -- Full Path", 10 * dpr, h - 10 * dpr);
   }
@@ -1532,8 +1532,8 @@
     cam: {
       title: "Camera Perception",
       metric: "31/36 #1",
-      img: "static/img/teaser_vis/cam.png",
-      color: "#fb7185",
+      img: "static/img/teaser_vis/cam_light.png",
+      color: "#9f3e52",
       mods: ["image", "cam"],
       lanes: ["und"],
       cogt: false,
@@ -1545,8 +1545,8 @@
     geo: {
       title: "3D Geometry",
       metric: "0.992 δ₁ · 12.3°",
-      img: "static/img/teaser_vis/geo.png",
-      color: "#34d399",
+      img: "static/img/teaser_vis/geo_light.png",
+      color: "#2b7a5e",
       mods: ["image", "video"],
       lanes: ["gen"],
       cogt: false,
@@ -1558,8 +1558,8 @@
     qa: {
       title: "Spatial Reasoning",
       metric: "87.4% / 76.50%",
-      img: "static/img/teaser_vis/qa.png",
-      color: "#a78bfa",
+      img: "static/img/teaser_vis/qa_light.png",
+      color: "#5b4d96",
       mods: ["image", "video", "lang"],
       lanes: ["und", "gen"],
       cogt: true,
@@ -1571,8 +1571,8 @@
     sim: {
       title: "World Simulation",
       metric: "79.0 Qual · 7.98 WMB",
-      img: "static/img/teaser_vis/sim.png",
-      color: "#38bdf8",
+      img: "static/img/teaser_vis/sim_light.png",
+      color: "#2563a8",
       mods: ["image", "video", "lang", "cam", "time"],
       lanes: ["und", "gen"],
       cogt: true,

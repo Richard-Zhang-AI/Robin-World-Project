@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="static/css/style.css?v=16">
+<link rel="stylesheet" href="static/css/style.css?v=18">
 </head>
 <body>
 
@@ -191,12 +191,27 @@
             <a class="teaser-jump" id="teaser-jump" href="#camera">Inspect Pillar ↓</a>
           </div>
           <div class="teaser-stage-imgwrap">
-            <img id="teaser-stage-img" src="static/img/teaser_vis/cam.png" alt="Active pillar qualitative visualization">
+            <img id="teaser-stage-img" src="static/img/teaser_vis/cam_light.png" alt="Active pillar qualitative visualization">
           </div>
           <div class="teaser-foot-txt" id="teaser-foot-txt">
             <b>Camera Perception (31/36 #1):</b> Estimates camera <i>roll, pitch, vFoV</i> alongside dense perspective fields <i>F</i> with closed-loop residual feedback (−41.9% error).
           </div>
         </div>
+      </div>
+
+      <div class="teaser-defs" aria-label="Symbol definitions">
+        <span class="tdef-lbl">Symbols</span>
+        <span class="tdef-item"><code>RGB</code> observed frame</span>
+        <span class="tdef-item"><code>Txt</code> text / prompt</span>
+        <span class="tdef-item"><code><i>c</i></code> camera (roll, pitch, vFoV)</span>
+        <span class="tdef-item"><code>?</code> / <code>A</code> spatial query &amp; answer</span>
+        <span class="tdef-item"><code>Grid</code> 16&times;16 patch grid</span>
+        <span class="tdef-item"><code>Pts</code> lifted 3D point cloud</span>
+        <span class="tdef-item"><code><i>F</i></code> perspective field</span>
+        <span class="tdef-item"><code>&rho;</code> inverse depth</span>
+        <span class="tdef-item"><code><i>N</i></code> surface normals</span>
+        <span class="tdef-item"><code><i>I<sub>t</sub></i></code> generated novel view</span>
+        <span class="tdef-item"><code>⇄ CoGT</code> Chain of Geometric Thought feedback</span>
       </div>
     </div>
   </div>
@@ -211,7 +226,7 @@
 
     <div class="pipeline-explorer reveal">
       <div class="pipeline-stage-bar">
-        <span style="font:600 12px/1 var(--mono);letter-spacing:.7px;color:#94a3b8;text-transform:uppercase">Interactive Architecture · Hover Modules or Select Capability</span>
+        <span style="font:600 12px/1 var(--mono);letter-spacing:.7px;color:var(--ink-faint);text-transform:uppercase">Interactive Architecture · Hover Modules or Select Capability</span>
         <div class="chips" style="margin:0">
           <button class="chip on" id="arch-all-btn" data-route="all">All Signal Flows</button>
           <button class="chip" id="arch-play-btn">Pause Pulse</button>
@@ -220,7 +235,7 @@
 
       <figure class="pipeline-figure">
         <div class="pipeline-board" id="arch-board">
-          <img class="pipeline-original" src="static/img/method_dark.png" alt="Robin-World unified architecture diagram">
+          <img class="pipeline-original" src="static/img/method_light.png" alt="Robin-World unified architecture diagram">
 
           <svg class="pipeline-overlay" id="arch-overlay" viewBox="0 0 2048 820" preserveAspectRatio="none">
             <defs>
@@ -426,7 +441,7 @@
       <div class="card pad">
         <h3>Single-View Perspective Fields &amp; Horizon Fit</h3>
         <div class="paper-frame" style="margin-top:10px">
-          <img src="static/img/pillars/teaser_cam_dark.png" alt="Single-view perspective field, latitude, and up-vector predictions">
+          <img src="static/img/pillars/teaser_cam_light.png" alt="Single-view perspective field, latitude, and up-vector predictions">
         </div>
       </div>
 
@@ -460,7 +475,7 @@
           <span class="small muted"><b>31 of 36 #1</b> (0.24° / 0.81° / 1.57°)</span>
         </div>
         <div class="fig-fill">
-          <img class="figimg" src="static/img/camera_radar_dark.png" alt="MegaDepth, TartanAir, LaMAR camera perception radar charts">
+          <img class="figimg" src="static/img/camera_radar_light.png" alt="MegaDepth, TartanAir, LaMAR camera perception radar charts">
         </div>
       </div>
 
@@ -488,7 +503,7 @@
           <div class="vcol">
             <div class="vval delta">60.65%</div>
             <div class="vtrack"><div class="vfill green" data-v="60.65"></div></div>
-            <div class="vlbl"><b>CoGT</b><br><span style="color:#34d399">+2.58</span></div>
+            <div class="vlbl"><b>CoGT</b><br><span style="color:var(--ours)">+2.58</span></div>
           </div>
         </div>
       </div>
@@ -540,7 +555,7 @@
       <div class="card pad">
         <h3>Intrinsic-Free Lifted 3D Point Clouds</h3>
         <div class="paper-frame" style="margin-top:10px">
-          <img src="static/img/pillars/teaser_geo_dark.png?v=2" alt="Lifted 3D point clouds and dense maps across indoor and outdoor scenes">
+          <img src="static/img/pillars/teaser_geo_light.png" alt="Lifted 3D point clouds and dense maps across indoor and outdoor scenes">
         </div>
       </div>
     </div>
@@ -609,7 +624,7 @@
       <div class="card pad">
         <h3>CV-Bench vs. VSI-Bench vs. MMSI-Bench</h3>
         <div class="fig-fill" style="margin-top:10px">
-          <img class="figimg" src="static/img/reasoning_cmp_dark.png" alt="Spatial reasoning Pareto comparison">
+          <img class="figimg" src="static/img/reasoning_cmp_light.png" alt="Spatial reasoning Pareto comparison">
         </div>
       </div>
     </div>
@@ -636,17 +651,17 @@
 
       <div class="traj-panel">
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <strong style="font-size:14.5px;color:#fff">GT Camera Trajectory (XZ Plane)</strong>
-          <span class="small" style="color:#8b96ab;font-family:var(--mono)">24 fps · Click turn to seek</span>
+          <strong style="font-size:14.5px;color:var(--ink)">GT Camera Trajectory (XZ Plane)</strong>
+          <span class="small" style="color:var(--ink-faint);font-family:var(--mono)">24 fps · Click turn to seek</span>
         </div>
         <div class="traj-canvas-wrap">
           <canvas id="traj-canvas"></canvas>
         </div>
         <div>
-          <div style="font:600 11px/1 var(--sans);text-transform:uppercase;letter-spacing:.8px;color:#8b96ab;margin-bottom:7px">Action Sequence</div>
+          <div style="font:600 11px/1 var(--sans);text-transform:uppercase;letter-spacing:.8px;color:var(--ink-faint);margin-bottom:7px">Action Sequence</div>
           <div class="turn-track" id="exp-turns"></div>
         </div>
-        <p class="small" id="exp-prompt" style="margin:0;color:#9aa4b6;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden"></p>
+        <p class="small" id="exp-prompt" style="margin:0;color:var(--ink-soft);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden"></p>
       </div>
     </div>
 
@@ -655,7 +670,7 @@
       <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px">
         <div>
           <span class="pill-tag accent" style="margin-bottom:4px;display:inline-block">NATIVE 24 FPS ROLLOUTS</span>
-          <h3 style="color:#fff;margin:2px 0 0">Interactive World Rollout Gallery (16 Scenes)</h3>
+          <h3 style="margin:2px 0 0">Interactive World Rollout Gallery (16 Scenes)</h3>
         </div>
         <div class="chips" id="gal-filters" style="margin:0">
           <button class="chip on" data-filter="all">All (16)</button>
@@ -674,7 +689,7 @@
           <span class="pill-tag">JEPA PREDICTIVE STATE Z</span>
           <span class="auto-pill" id="disc-auto-pill"><span class="adot"></span>Jump-Frame Cycling</span>
         </div>
-        <h3 style="color:#fff">Discrete Space Jumps (8 Cases)</h3>
+        <h3>Discrete Space Jumps (8 Cases)</h3>
         <div class="chips" id="disc-chips" style="margin-top:10px"></div>
         <div class="chips" id="disc-qchips" style="display:none;margin:-4px 0 10px"></div>
         <div class="grid2" style="gap:10px">
@@ -697,7 +712,7 @@
             <span class="j-badge muted">Ground-Truth Target</span>
           </figure>
         </div>
-        <p class="small" id="disc-note" style="color:#aeb7c7;margin:10px 0 0"></p>
+        <p class="small" id="disc-note" style="color:var(--ink-soft);margin:10px 0 0"></p>
       </div>
 
       <div class="card pad">
@@ -705,8 +720,8 @@
           <span class="pill-tag">3D POINT-CLOUD REPROJECTION · BULLET-TIME</span>
           <span class="auto-pill" id="frz-auto-pill"><span class="adot"></span>158f · 30 fps</span>
         </div>
-        <h3 style="color:#fff">Fixed-Time Point-Cloud Anchoring (<i>&tau;<sub>k</sub> = t*</i>)</h3>
-        <p class="small" style="color:#aeb7c7;margin:4px 0 10px">Freezing dynamic scene motion at <i>t*</i> while sweeping novel 3D viewpoints (<b>20.42 dB PSNR</b>, <b>0.934</b> static consistency across 128 clips).</p>
+        <h3>Fixed-Time Point-Cloud Anchoring (<i>&tau;<sub>k</sub> = t*</i>)</h3>
+        <p class="small" style="color:var(--ink-soft);margin:4px 0 10px">Freezing dynamic scene motion at <i>t*</i> while sweeping novel 3D viewpoints (<b>20.42 dB PSNR</b>, <b>0.934</b> static consistency across 128 clips).</p>
         <div class="chips" id="frz-chips"></div>
         <div class="frz-vid-box">
           <video id="frz-vid" controls autoplay muted loop playsinline poster="static/video/bullet_time/01_bookfall_orbit.jpg" src="static/video/bullet_time/01_bookfall_orbit.mp4"></video>
@@ -723,7 +738,7 @@
     <div class="cap">
       <div>
         <strong id="modal-cap" style="font-size:15.5px"></strong>
-        <div id="modal-acts" class="small" style="color:#9aa4b6;margin-top:4px"></div>
+        <div id="modal-acts" class="small" style="color:var(--ink-faint);margin-top:4px"></div>
       </div>
       <button id="modal-close">Close</button>
     </div>
@@ -751,7 +766,7 @@
           <h3 style="margin-bottom:6px">MegaDepth Single-View Calibration</h3>
           <p class="small muted" style="margin:0">Leads <b>12/12</b> on MegaDepth and <b>31/36</b> across MegaDepth, TartanAir &amp; LaMAR.</p>
         </div>
-        <img class="figimg" src="static/img/camera_radar_dark.png" alt="MegaDepth, TartanAir, LaMAR radar charts">
+        <img class="figimg" src="static/img/camera_radar_light.png" alt="MegaDepth, TartanAir, LaMAR radar charts">
       </div>
       <div class="tblwrap">
         <table class="tbl compact">
@@ -802,7 +817,7 @@
           <h3 style="margin-bottom:6px">Spatial Question Answering (4 Benchmarks)</h3>
           <p class="small muted" style="margin:0">Rank #1 on <b>CV-Bench (87.4%)</b>, <b>VSI-Bench (76.50%)</b>, <b>MMSI-Bench (37.2%)</b>, and <b>BLINK (50.08%)</b>.</p>
         </div>
-        <img class="figimg" src="static/img/reasoning_cmp_dark.png" alt="Spatial reasoning Pareto comparison" style="max-width:420px;margin:0 auto">
+        <img class="figimg" src="static/img/reasoning_cmp_light.png" alt="Spatial reasoning Pareto comparison" style="max-width:420px;margin:0 auto">
       </div>
       <div class="tblwrap">
         <table class="tbl">
@@ -829,10 +844,10 @@
           <h3 style="margin-bottom:6px">WBench (158 Cases) &amp; WorldModelBench (350 Clips)</h3>
           <p class="small muted" style="margin:0">WBench Qual. <b>79.0 (#1)</b> · WorldModelBench <b>7.98 (#1)</b> · JEPA Z <b>+7.74 dB</b> cross-view · Bullet-time <b>0.934</b>.</p>
         </div>
-        <img class="figimg" src="static/img/wbench_radar_dark.png" alt="WBench 11-metric radar chart" style="max-width:400px;margin:0 auto">
+        <img class="figimg" src="static/img/wbench_radar_light.png" alt="WBench 11-metric radar chart" style="max-width:400px;margin:0 auto">
       </div>
 
-      <h4 style="margin:0 0 8px;font:600 13.5px/1 var(--mono);color:#bae6fd">WBench Navigation (158 Cases)</h4>
+      <h4 style="margin:0 0 8px;font:600 13.5px/1 var(--mono);color:var(--navy)">WBench Navigation (158 Cases)</h4>
       <div class="tblwrap" style="margin-bottom:20px">
         <table class="tbl">
           <thead>
@@ -853,7 +868,7 @@
         </table>
       </div>
 
-      <h4 style="margin:0 0 8px;font:600 13.5px/1 var(--mono);color:#bae6fd">WorldModelBench (350 Test Clips)</h4>
+      <h4 style="margin:0 0 8px;font:600 13.5px/1 var(--mono);color:var(--navy)">WorldModelBench (350 Test Clips)</h4>
       <div class="tblwrap">
         <table class="tbl">
           <thead>
@@ -896,6 +911,6 @@
 </footer>
 
 <script src="static/js/demo_data.js?v=3"></script>
-<script src="static/js/main.js?v=16"></script>
+<script src="static/js/main.js?v=17"></script>
 </body>
 </html>
