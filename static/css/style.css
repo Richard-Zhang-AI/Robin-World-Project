@@ -152,16 +152,16 @@ a:hover { text-decoration: underline; }
 /* Understated 4-pillar anchor pills in Hero */
 .pillar-btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 14px 0 6px; }
 .pbtn {
-  display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; border-radius: 999px;
-  font-weight: 600; font-size: 13px; text-decoration: none; transition: background .16s, border-color .16s;
-  background: #ffffff; border: 1px solid var(--line-strong); color: var(--ink-soft);
+  display: inline-flex; align-items: center; gap: 7px; padding: 8px 15px; border-radius: 999px;
+  font-weight: 600; font-size: 13.2px; text-decoration: none; transition: background .16s, border-color .16s, transform .16s;
+  background: #ffffff; border: 1px solid var(--line-strong); color: var(--ink);
 }
-.pbtn:hover { background: #f1f5f9; color: var(--ink); text-decoration: none; }
-.pbtn .pdot { width: 7px; height: 7px; border-radius: 50%; }
-.pbtn.p1 .pdot { background: var(--p1); }
-.pbtn.p2 .pdot { background: var(--p2); }
-.pbtn.p3 .pdot { background: var(--p3); }
-.pbtn.p4 .pdot { background: var(--p4); }
+.pbtn:hover { background: #f1f5f9; transform: translateY(-1px); text-decoration: none; }
+.pbtn svg { width: 15px; height: 15px; flex: none; }
+.pbtn.p1 svg { color: var(--p1); }
+.pbtn.p2 svg { color: var(--p2); }
+.pbtn.p3 svg { color: var(--p3); }
+.pbtn.p4 svg { color: var(--p4); }
 
 .hero .tldr {
   margin: 18px auto 0; max-width: 790px; font-size: 15px; color: var(--ink-soft); line-height: 1.65;
