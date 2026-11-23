@@ -18,14 +18,49 @@
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
-  // ---------- 2. Hero drifting mosaic ----------
+  // ---------- 2. Hero drifting mosaic (World Sim + Depth + Normals + 3D Point Clouds + Camera Fields) ----------
   const mosaic = document.getElementById("mosaic");
   if (mosaic && demos.length) {
-    const posters = demos.map((d) => d.poster);
+    const worldPosters = demos.map((d) => d.poster);
+    const camTiles = [
+      "static/img/mosaic/cam_aurora_field.jpg",
+      "static/img/mosaic/cam_rooftops_field.jpg",
+      "static/img/mosaic/cam_classroom_field.jpg",
+      "static/img/feedback/fb_r0_target.jpg",
+      "static/img/feedback/fb_r1_target.jpg",
+      "static/img/dense/dense_0_2.jpg",
+    ];
+    const pts3dTiles = [
+      "static/img/mosaic/pts3d_library.jpg",
+      "static/img/mosaic/pts3d_staircase.jpg",
+      "static/img/mosaic/pts3d_racer.jpg",
+      "static/img/mosaic/pts3d_courtyard.jpg",
+      "static/img/mosaic/pts3d_living.jpg",
+      "static/img/mosaic/pts3d_desert.jpg",
+    ];
+    const geoMapTiles = [
+      "static/img/mosaic/depth_racer.jpg",
+      "static/img/dense/dense_1_6.jpg",
+      "static/img/mosaic/depth_courtyard.jpg",
+      "static/img/dense/dense_gt_2_4.jpg",
+      "static/img/dense/dense_gt_3_4.jpg",
+      "static/img/dense/dense_gt_4_4.jpg",
+      "static/img/dense/dense_0_6.jpg",
+      "static/img/dense/dense_gt_2_2.jpg",
+    ];
+    const mixed = [];
+    const maxLen = Math.max(worldPosters.length, camTiles.length, pts3dTiles.length, geoMapTiles.length);
+    for (let i = 0; i < maxLen; i++) {
+      mixed.push(worldPosters[i % worldPosters.length]);
+      mixed.push(pts3dTiles[i % pts3dTiles.length]);
+      mixed.push(geoMapTiles[i % geoMapTiles.length]);
+      mixed.push(camTiles[i % camTiles.length]);
+    }
     for (let r = 0; r < 3; r++) {
       const row = document.createElement("div");
       row.className = "row";
-      const shifted = posters.slice(r * 4).concat(posters.slice(0, r * 4));
+      const offset = r * 7;
+      const shifted = mixed.slice(offset).concat(mixed.slice(0, offset));
       const doubled = shifted.concat(shifted);
       doubled.forEach((src) => {
         const img = document.createElement("img");
