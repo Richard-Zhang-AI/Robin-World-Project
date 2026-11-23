@@ -1206,12 +1206,13 @@
     });
   }
 
-  function selectExplorer(demo) {
+  function selectExplorer(demo, autoPlay = true) {
     curExp = demo;
     expChips.querySelectorAll(".chip").forEach((b) => b.classList.toggle("on", b.dataset.key === demo.key));
     expVid.src = demo.video;
     expVid.poster = demo.poster;
-    expVid.play().catch(() => {});
+    expVid.load();
+    if (autoPlay) expVid.play().catch(() => {});
     expTitle.textContent = demo.title;
     expModeBadge.textContent = demo.perspective === "third_person" ? "Third-Person Orbit" : "First-Person 6-DoF";
     expModeBadge.className = "pill-tag";
@@ -1224,6 +1225,7 @@
       sp.addEventListener("click", () => {
         const dur = expVid.duration || demo.duration || 16;
         expVid.currentTime = (i / demo.actions.length) * dur + 0.05;
+        expVid.play().catch(() => {});
       });
       expTurns.appendChild(sp);
     });
@@ -1234,33 +1236,56 @@
 
   if (expChips && explorerList.length) {
     let expIdx = 0;
-    let expPaused = false;
+    let expManual = false;
+    let expHovered = false;
+    let expVisible = false;
     explorerList.forEach((d, i) => {
       const b = document.createElement("button");
       b.className = "chip";
       b.dataset.key = d.key;
       b.textContent = d.title.split(" · ")[0];
       b.addEventListener("click", () => {
-        expPaused = true;
+        expManual = true;
+        expVid.loop = true;
         expIdx = i;
-        selectExplorer(d);
+        selectExplorer(d, true);
       });
       expChips.appendChild(b);
     });
+    expVid.loop = false;
     expVid.addEventListener("timeupdate", updateExplorerTelemetry);
-    window.addEventListener("resize", () => updateExplorerTelemetry());
-    selectExplorer(explorerList[0]);
-    const expSection = document.querySelector(".explorer-grid");
-    expSection?.addEventListener("mouseenter", () => (expPaused = true));
-    expSection?.addEventListener("mouseleave", () => (expPaused = false));
-    expChips.addEventListener("mouseenter", () => (expPaused = true));
-    expChips.addEventListener("mouseleave", () => (expPaused = false));
-    setInterval(() => {
-      if (!expPaused) {
-        expIdx = (expIdx + 1) % explorerList.length;
-        selectExplorer(explorerList[expIdx]);
+    expVid.addEventListener("ended", () => {
+      if (expManual) {
+        expVid.currentTime = 0;
+        expVid.play().catch(() => {});
+        return;
       }
-    }, 9000);
+      if (expHovered || !expVisible) {
+        expVid.currentTime = 0;
+        if (expVisible) expVid.play().catch(() => {});
+        return;
+      }
+      expIdx = (expIdx + 1) % explorerList.length;
+      selectExplorer(explorerList[expIdx], true);
+    });
+    window.addEventListener("resize", () => updateExplorerTelemetry());
+    selectExplorer(explorerList[0], false);
+    const expSection = document.querySelector(".explorer-grid");
+    expSection?.addEventListener("mouseenter", () => (expHovered = true));
+    expSection?.addEventListener("mouseleave", () => (expHovered = false));
+    expChips.addEventListener("mouseenter", () => (expHovered = true));
+    expChips.addEventListener("mouseleave", () => (expHovered = false));
+    new IntersectionObserver(
+      (entries) => {
+        expVisible = entries.some((e) => e.isIntersecting);
+        if (expVisible) {
+          expVid.play().catch(() => {});
+        } else {
+          expVid.pause();
+        }
+      },
+      { threshold: 0.25 }
+    ).observe(expVid);
   }
 
   // ---------- 11. Discrete Viewpoint Jumps (8 cases -> Jump-Frame Showcase, no drag slider) ----------
@@ -1387,41 +1412,65 @@
   const frzVid = document.getElementById("frz-vid");
   const frzBadge = document.getElementById("frz-badge");
   const frzAutoPill = document.getElementById("frz-auto-pill");
-  function selectFrz(idx) {
+  function selectFrz(idx, autoPlay = true) {
     const c = FREEZE_CASES[idx];
     frzChips.querySelectorAll(".chip").forEach((b, i) => b.classList.toggle("on", i === idx));
     if (frzVid) {
       frzVid.src = c.vid;
       frzVid.poster = c.poster;
-      frzVid.play().catch(() => {});
+      frzVid.load();
+      if (autoPlay) frzVid.play().catch(() => {});
     }
     if (frzBadge) frzBadge.textContent = c.badge;
   }
-  if (frzChips) {
+  if (frzChips && frzVid) {
     let frzIdx = 0;
-    let frzPaused = false;
+    let frzManual = false;
+    let frzHovered = false;
+    let frzVisible = false;
     FREEZE_CASES.forEach((c, i) => {
       const b = document.createElement("button");
       b.className = "chip" + (i === 0 ? " on" : "");
       b.textContent = c.label;
       b.addEventListener("click", () => {
-        frzPaused = true;
+        frzManual = true;
+        frzVid.loop = true;
         if (frzAutoPill) frzAutoPill.textContent = "Manual";
         frzIdx = i;
-        selectFrz(i);
+        selectFrz(i, true);
       });
       frzChips.appendChild(b);
     });
-    selectFrz(0);
-    const fCard = frzChips.closest(".card");
-    fCard?.addEventListener("mouseenter", () => (frzPaused = true));
-    fCard?.addEventListener("mouseleave", () => (frzPaused = false));
-    setInterval(() => {
-      if (!frzPaused) {
-        frzIdx = (frzIdx + 1) % FREEZE_CASES.length;
-        selectFrz(frzIdx);
+    frzVid.loop = false;
+    frzVid.addEventListener("ended", () => {
+      if (frzManual) {
+        frzVid.currentTime = 0;
+        frzVid.play().catch(() => {});
+        return;
       }
-    }, 6200);
+      if (frzHovered || !frzVisible) {
+        frzVid.currentTime = 0;
+        if (frzVisible) frzVid.play().catch(() => {});
+        return;
+      }
+      frzIdx = (frzIdx + 1) % FREEZE_CASES.length;
+      selectFrz(frzIdx, true);
+    });
+    selectFrz(0, false);
+    const fCard = frzChips.closest(".card");
+    fCard?.addEventListener("mouseenter", () => (frzHovered = true));
+    fCard?.addEventListener("mouseleave", () => (frzHovered = false));
+    new IntersectionObserver(
+      (entries) => {
+        frzVisible = entries.some((e) => e.isIntersecting);
+        if (frzVisible) {
+          frzVid.play().catch(() => {});
+        } else {
+          frzVid.pause();
+        }
+      },
+      { threshold: 0.25 }
+    ).observe(frzVid);
   }
 
   // ---------- 13. Filterable 16-Video Gallery + Modal ----------
@@ -1478,6 +1527,7 @@
     const galFilterBtns = [...document.querySelectorAll("#gal-filters .chip")];
     let galIdx = 0;
     let galPaused = false;
+    let galVisible = false;
     function applyGalFilter(idx) {
       const btn = galFilterBtns[idx];
       if (!btn) return;
@@ -1496,12 +1546,16 @@
     });
     galGrid.addEventListener("mouseenter", () => (galPaused = true));
     galGrid.addEventListener("mouseleave", () => (galPaused = false));
+    new IntersectionObserver(
+      (entries) => { galVisible = entries.some((e) => e.isIntersecting); },
+      { threshold: 0.15 }
+    ).observe(galGrid);
     setInterval(() => {
-      if (!galPaused && galFilterBtns.length) {
+      if (!galPaused && galVisible && galFilterBtns.length) {
         galIdx = (galIdx + 1) % galFilterBtns.length;
         applyGalFilter(galIdx);
       }
-    }, 6500);
+    }, 10000);
 
     document.getElementById("modal-close")?.addEventListener("click", () => {
       modalVid.pause();

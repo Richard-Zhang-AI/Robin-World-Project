@@ -642,7 +642,7 @@
 
     <div class="explorer-grid reveal">
       <div class="explorer-vid-box">
-        <video id="exp-vid" controls autoplay muted loop playsinline></video>
+        <video id="exp-vid" controls muted playsinline preload="metadata"></video>
         <div class="explorer-overlay">
           <span class="pill-tag" id="exp-title">Loading…</span>
           <span class="pill-tag accent" id="exp-mode-badge">6-DoF Rollout</span>
@@ -724,7 +724,7 @@
         <p class="small" style="color:var(--ink-soft);margin:4px 0 10px">Freezing dynamic scene motion at <i>t*</i> while sweeping novel 3D viewpoints (<b>20.42 dB PSNR</b>, <b>0.934</b> static consistency across 128 clips).</p>
         <div class="chips" id="frz-chips"></div>
         <div class="frz-vid-box">
-          <video id="frz-vid" controls autoplay muted loop playsinline poster="static/video/bullet_time/01_bookfall_orbit.jpg" src="static/video/bullet_time/01_bookfall_orbit.mp4"></video>
+          <video id="frz-vid" controls muted playsinline preload="metadata" poster="static/video/bullet_time/01_bookfall_orbit.jpg" src="static/video/bullet_time/01_bookfall_orbit.mp4"></video>
           <span class="j-badge jepa" id="frz-badge">Bookfall · Orbit (t* Frozen)</span>
         </div>
       </div>
@@ -911,6 +911,6 @@
 </footer>
 
 <script src="static/js/demo_data.js?v=3"></script>
-<script src="static/js/main.js?v=17"></script>
+<script src="static/js/main.js?v=18"></script>
 </body>
 </html>
