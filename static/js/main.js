@@ -56,10 +56,10 @@
       mixed.push(geoMapTiles[i % geoMapTiles.length]);
       mixed.push(camTiles[i % camTiles.length]);
     }
-    for (let r = 0; r < 3; r++) {
+    for (let r = 0; r < 5; r++) {
       const row = document.createElement("div");
       row.className = "row";
-      const offset = r * 7;
+      const offset = (r * 5) % mixed.length;
       const shifted = mixed.slice(offset).concat(mixed.slice(0, offset));
       const doubled = shifted.concat(shifted);
       doubled.forEach((src) => {
