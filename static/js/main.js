@@ -748,7 +748,277 @@
   const geoRightLab = document.getElementById("geo-right-lab");
   const geoNote = document.getElementById("geo-note");
 
-  function renderGeo() {
+  // ---------- 7B. Interactive Three.js 3D Point Cloud & Frustum Viewer ----------
+  const pcStage = document.getElementById("pc3d-stage");
+  const pcCanvas = document.getElementById("pc3d-canvas");
+  const pcSceneBadge = document.getElementById("pc3d-scene-badge");
+  const pcColorChips = document.getElementById("pc3d-color-chips");
+  const pcFrustumBtn = document.getElementById("pc3d-frustum-btn");
+  const pcOrbitBtn = document.getElementById("pc3d-orbit-btn");
+  const pcResetBtn = document.getElementById("pc3d-reset-btn");
+  const pcSizeSlider = document.getElementById("pc3d-size");
+
+  let pcViewer = null;
+  if (pcStage && pcCanvas && window.THREE && THREE.OrbitControls) {
+    try {
+      const renderer = new THREE.WebGLRenderer({ canvas: pcCanvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setClearColor(0xf1f5f9, 1);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(44, 1, 0.05, 80);
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 0.9;
+      controls.minDistance = 0.7;
+      controls.maxDistance = 14;
+
+      const worldGroup = new THREE.Group();
+      scene.add(worldGroup);
+
+      // Subtle academic floor grid & camera frustum group
+      const gridHelper = new THREE.GridHelper(7.2, 18, 0x94a3b8, 0xcbd5e1);
+      gridHelper.position.set(0, -1.35, -2.2);
+      worldGroup.add(gridHelper);
+
+      const frustumGroup = new THREE.Group();
+      worldGroup.add(frustumGroup);
+
+      const ptMat = new THREE.PointsMaterial({
+        size: 0.044,
+        vertexColors: true,
+        sizeAttenuation: true,
+      });
+      const ptGeo = new THREE.BufferGeometry();
+      const pointsMesh = new THREE.Points(ptGeo, ptMat);
+      worldGroup.add(pointsMesh);
+
+      const pcCache = new Map();
+      let pcColorMode = "rgb";
+      let pcCurData = null;
+      let pcDefaultView = { target: [0, 0, -2.2], pos: [1.55, 0.78, 0.95] };
+      let pcVisible = false;
+      let pcReqId = 0;
+
+      function loadImg(src) {
+        return new Promise((res, rej) => {
+          const im = new Image();
+          im.crossOrigin = "anonymous";
+          im.onload = () => res(im);
+          im.onerror = rej;
+          im.src = src;
+        });
+      }
+
+      // Perceptual Viridis/Turbo-style colormap for Depth mode
+      function depthColormap(t) {
+        const x = Math.max(0, Math.min(1, t));
+        const r = Math.min(1, Math.max(0, 1.5 * x - 0.15 + 0.35 * Math.sin(x * Math.PI * 1.3)));
+        const g = Math.min(1, Math.max(0, Math.sin(x * Math.PI) * 0.92 + 0.08));
+        const b = Math.min(1, Math.max(0, 0.92 - 1.15 * x + 0.25 * Math.sin(x * Math.PI * 2)));
+        return [r, g, b];
+      }
+
+      function buildFrustum(aspect) {
+        frustumGroup.clear();
+        const fz = -0.58;
+        const hh = Math.tan((28 * Math.PI) / 180) * Math.abs(fz);
+        const hw = hh * aspect;
+        const verts = new Float32Array([
+          0, 0, 0, -hw,  hh, fz,
+          0, 0, 0,  hw,  hh, fz,
+          0, 0, 0,  hw, -hh, fz,
+          0, 0, 0, -hw, -hh, fz,
+          -hw,  hh, fz,  hw,  hh, fz,
+           hw,  hh, fz,  hw, -hh, fz,
+           hw, -hh, fz, -hw, -hh, fz,
+          -hw, -hh, fz, -hw,  hh, fz,
+        ]);
+        const fg = new THREE.BufferGeometry();
+        fg.setAttribute("position", new THREE.BufferAttribute(verts, 3));
+        const fl = new THREE.LineSegments(fg, new THREE.LineBasicMaterial({ color: 0x9f3e52 }));
+        frustumGroup.add(fl);
+        const dot = new THREE.Mesh(
+          new THREE.SphereGeometry(0.032, 12, 12),
+          new THREE.MeshBasicMaterial({ color: 0x9f3e52 })
+        );
+        frustumGroup.add(dot);
+      }
+
+      function applyPointColors() {
+        if (!pcCurData) return;
+        const colArr = pcColorMode === "normals"
+          ? pcCurData.colNorm
+          : pcColorMode === "depth"
+            ? pcCurData.colDepth
+            : pcCurData.colRgb;
+        ptGeo.setAttribute("color", new THREE.BufferAttribute(colArr, 3));
+        ptGeo.attributes.color.needsUpdate = true;
+      }
+
+      function resetCameraView() {
+        const [tx, ty, tz] = pcDefaultView.target;
+        const [px, py, pz] = pcDefaultView.pos;
+        controls.target.set(tx, ty, tz);
+        camera.position.set(px, py, pz);
+        controls.update();
+      }
+
+      async function buildSceneCloud(sc) {
+        const key = sc.label;
+        if (pcCache.has(key)) return pcCache.get(key);
+        const [rgbIm, depIm, normIm] = await Promise.all([
+          loadImg(sc.rgb),
+          loadImg(sc.maps.depth.pred),
+          loadImg(sc.maps.normals ? sc.maps.normals.pred : sc.rgb),
+        ]);
+        const W = 224;
+        const H = Math.max(112, Math.round((W * rgbIm.naturalHeight) / Math.max(1, rgbIm.naturalWidth)));
+        const readPixels = (im) => {
+          const c = document.createElement("canvas");
+          c.width = W; c.height = H;
+          const x = c.getContext("2d", { willReadFrequently: true });
+          x.drawImage(im, 0, 0, W, H);
+          return x.getImageData(0, 0, W, H).data;
+        };
+        const dRgb = readPixels(rgbIm);
+        const dDep = readPixels(depIm);
+        const dNorm = readPixels(normIm);
+
+        const rhoAt = (px, py) => {
+          const i = (py * W + px) * 4;
+          return 0.299 * dDep[i] + 0.587 * dDep[i + 1] + 0.114 * dDep[i + 2];
+        };
+
+        const f = (H / 2) / Math.tan((28 * Math.PI) / 180);
+        const posList = [];
+        const rgbList = [];
+        const normList = [];
+        const depthList = [];
+        let sumX = 0, sumY = 0, sumZ = 0, minY = Infinity;
+
+        for (let y = 1; y < H - 1; y++) {
+          for (let x = 1; x < W - 1; x++) {
+            const r = rhoAt(x, y);
+            if (r < 12) continue;
+            const gx = Math.abs(rhoAt(x + 1, y) - rhoAt(x - 1, y));
+            const gy = Math.abs(rhoAt(x, y + 1) - rhoAt(x, y - 1));
+            if (Math.max(gx, gy) > 28) continue;
+
+            const rn = Math.max(0.04, Math.min(1.0, (r - 14) / 228));
+            const d = 1.0 / (0.24 + 0.76 * rn);
+            const X = ((x - W / 2) / f) * d;
+            const Y = -((y - H / 2) / f) * d;
+            const Z = -d;
+
+            posList.push(X, Y, Z);
+            sumX += X; sumY += Y; sumZ += Z;
+            if (Y < minY) minY = Y;
+
+            const idx = (y * W + x) * 4;
+            rgbList.push(dRgb[idx] / 255, dRgb[idx + 1] / 255, dRgb[idx + 2] / 255);
+            normList.push(dNorm[idx] / 255, dNorm[idx + 1] / 255, dNorm[idx + 2] / 255);
+            const [dr, dg, db] = depthColormap(rn);
+            depthList.push(dr, dg, db);
+          }
+        }
+
+        const nPts = posList.length / 3;
+        const data = {
+          nPts,
+          aspect: W / H,
+          positions: new Float32Array(posList),
+          colRgb: new Float32Array(rgbList),
+          colNorm: new Float32Array(normList),
+          colDepth: new Float32Array(depthList),
+          center: nPts ? [sumX / nPts, sumY / nPts, sumZ / nPts] : [0, 0, -2.0],
+          floorY: Number.isFinite(minY) ? Math.max(-2.2, minY - 0.05) : -1.1,
+        };
+        pcCache.set(key, data);
+        return data;
+      }
+
+      async function set3DScene(sc, resetView = true) {
+        const myReq = ++pcReqId;
+        if (pcSceneBadge) pcSceneBadge.textContent = `Lifting ${sc.label.split(" · ")[0]}…`;
+        try {
+          const data = await buildSceneCloud(sc);
+          if (myReq !== pcReqId) return;
+          pcCurData = data;
+          ptGeo.setAttribute("position", new THREE.BufferAttribute(data.positions, 3));
+          ptGeo.computeBoundingSphere();
+          applyPointColors();
+          buildFrustum(data.aspect);
+          gridHelper.position.set(data.center[0], data.floorY, data.center[2]);
+          pcDefaultView = {
+            target: [data.center[0], data.center[1] - 0.05, data.center[2] + 0.48],
+            pos: [data.center[0] + 2.35, data.center[1] + 1.25, 1.55],
+          };
+          if (resetView) resetCameraView();
+          if (pcSceneBadge) pcSceneBadge.textContent = `${sc.label.split(" · ")[0]} · ${(data.nPts / 1000).toFixed(1)}k 3D pts`;
+        } catch (err) {
+          if (pcSceneBadge) pcSceneBadge.textContent = "3D preview unavailable";
+        }
+      }
+
+      function resize3D() {
+        const rect = pcStage.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        renderer.setSize(rect.width, rect.height, false);
+        camera.aspect = rect.width / rect.height;
+        camera.updateProjectionMatrix();
+      }
+      resize3D();
+      new ResizeObserver(resize3D).observe(pcStage);
+
+      let rafId = 0;
+      function animate3D() {
+        if (!pcVisible) { rafId = 0; return; }
+        controls.update();
+        renderer.render(scene, camera);
+        rafId = requestAnimationFrame(animate3D);
+      }
+      new IntersectionObserver((entries) => {
+        pcVisible = entries.some((e) => e.isIntersecting);
+        if (pcVisible && !rafId) {
+          resize3D();
+          animate3D();
+        }
+      }, { threshold: 0.05 }).observe(pcStage);
+
+      pcColorChips?.querySelectorAll(".chip").forEach((b) => {
+        b.addEventListener("click", () => {
+          pcColorMode = b.dataset.pcColor;
+          pcColorChips.querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", x === b));
+          applyPointColors();
+        });
+      });
+      pcFrustumBtn?.addEventListener("click", () => {
+        frustumGroup.visible = !frustumGroup.visible;
+        pcFrustumBtn.classList.toggle("on", frustumGroup.visible);
+      });
+      pcOrbitBtn?.addEventListener("click", () => {
+        controls.autoRotate = !controls.autoRotate;
+        pcOrbitBtn.classList.toggle("on", controls.autoRotate);
+      });
+      pcResetBtn?.addEventListener("click", resetCameraView);
+      pcSizeSlider?.addEventListener("input", () => {
+        ptMat.size = Number(pcSizeSlider.value) / 1000;
+      });
+      controls.addEventListener("start", () => {
+        controls.autoRotate = false;
+        pcOrbitBtn?.classList.remove("on");
+      });
+
+      pcViewer = { setScene: set3DScene };
+    } catch (e) {
+      if (pcSceneBadge) pcSceneBadge.textContent = "WebGL unavailable";
+    }
+  }
+
+  function renderGeo(sync3D = true) {
     const sc = GEO_SCENES[geoSceneIdx];
     if (!sc.maps[geoMod]) geoMod = "depth";
     const m = sc.maps[geoMod];
@@ -764,10 +1034,12 @@
     geoLeftLab.textContent = geoLeftMode === "rgb" ? "Input RGB" : `Ref / Sensor ${m.name}`;
     geoRightLab.textContent = `Robin-World · ${m.name}`;
     geoNote.textContent = sc.note;
+    if (sync3D && pcViewer) pcViewer.setScene(sc, true);
   }
   if (geoSceneChips) {
     let geoPaused = false;
     const geoCard = document.getElementById("geo-card");
+    const pc3dCard = document.getElementById("pc3d-card");
     const geoAutoPill = document.getElementById("geo-auto-pill");
     const geoCmp = document.getElementById("geo-cmp");
     let sweepRight = true;
@@ -779,19 +1051,25 @@
       b.addEventListener("click", () => {
         geoPaused = true;
         if (geoAutoPill) geoAutoPill.textContent = "Manual";
-        geoSceneIdx = i; renderGeo();
+        geoSceneIdx = i; renderGeo(true);
       });
       geoSceneChips.appendChild(b);
     });
     geoModChips.querySelectorAll(".chip").forEach((b) => {
-      b.addEventListener("click", () => { geoPaused = true; geoMod = b.dataset.mod; renderGeo(); });
+      b.addEventListener("click", () => { geoPaused = true; geoMod = b.dataset.mod; renderGeo(false); });
     });
     geoLeftChips.querySelectorAll(".chip").forEach((b) => {
-      b.addEventListener("click", () => { geoPaused = true; geoLeftMode = b.dataset.left; renderGeo(); });
+      b.addEventListener("click", () => { geoPaused = true; geoLeftMode = b.dataset.left; renderGeo(false); });
     });
     geoCard?.addEventListener("mouseenter", () => (geoPaused = true));
     geoCard?.addEventListener("mouseleave", () => (geoPaused = false));
-    renderGeo();
+    pc3dCard?.addEventListener("mouseenter", () => (geoPaused = true));
+    pc3dCard?.addEventListener("mouseleave", () => (geoPaused = false));
+    pcStage?.addEventListener("pointerdown", () => {
+      geoPaused = true;
+      if (geoAutoPill) geoAutoPill.textContent = "Manual";
+    });
+    renderGeo(true);
 
     // Auto-cycle 6 geometry scenes + modalities + gentle divider sweep so visitors see depth, normals & fields proactively
     const GEO_MODS = ["depth", "normals", "field"];
@@ -804,14 +1082,14 @@
           const curModPos = GEO_MODS.indexOf(geoMod);
           geoMod = GEO_MODS[(curModPos + 1) % GEO_MODS.length];
         }
-        renderGeo();
+        renderGeo(true);
         if (geoCmp && !geoCmp.classList.contains("touched") && geoCmp._setPos) {
           geoCmp.classList.add("auto-sweep");
           sweepRight = !sweepRight;
           geoCmp._setPos(sweepRight ? 0.64 : 0.36);
         }
       }
-    }, 3800);
+    }, 5000);
   }
 
   // ---------- 8. Spatial Reasoning 4-Benchmark Auto-Carousel Gallery (Transparent Dark-Native Cards) ----------

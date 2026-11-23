@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="static/css/style.css?v=21">
+<link rel="stylesheet" href="static/css/style.css?v=23">
 </head>
 <body>
 
@@ -560,11 +560,34 @@
         <p class="small muted" id="geo-note" style="margin:10px 0 0"></p>
       </div>
 
-      <div class="card pad">
-        <h3>Intrinsic-Free Lifted 3D Point Clouds</h3>
-        <div class="paper-frame" style="margin-top:10px">
-          <img src="static/img/pillars/teaser_geo_light.png" alt="Lifted 3D point clouds and dense maps across indoor and outdoor scenes">
+      <div class="card pad" id="pc3d-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <h3 style="margin:0;white-space:nowrap">Interactive 3D Point Clouds</h3>
+          <span class="auto-pill" id="pc3d-hint"><span class="adot"></span>Drag · Scroll · Right-Pan</span>
         </div>
+        <div class="chiprow" style="margin-top:8px">
+          <span class="lbl">Color</span>
+          <div class="chips" id="pc3d-color-chips">
+            <button class="chip on" data-pc-color="rgb">RGB</button>
+            <button class="chip" data-pc-color="normals">Normals <i>N</i></button>
+            <button class="chip" data-pc-color="depth">Depth <i>&rho;</i></button>
+          </div>
+          <div class="chips" style="margin-left:auto">
+            <button class="chip on" id="pc3d-frustum-btn">Frustum</button>
+            <button class="chip on" id="pc3d-orbit-btn">Auto-Orbit</button>
+            <button class="chip" id="pc3d-reset-btn">Reset</button>
+          </div>
+        </div>
+        <div class="pc3d-stage" id="pc3d-stage">
+          <canvas id="pc3d-canvas"></canvas>
+          <span class="pc3d-badge tl" id="pc3d-scene-badge">Loading 3D cloud…</span>
+          <div class="pc3d-size-pill">
+            <span>Pts</span>
+            <input id="pc3d-size" type="range" min="22" max="76" value="44" aria-label="Point size">
+          </div>
+          <span class="pc3d-badge br">Three.js · Uncalibrated 3D Lift</span>
+        </div>
+        <p class="small muted" style="margin:10px 0 0">Synced with the active scene on the left—drag to orbit 360&deg;, scroll to zoom, or toggle <i>RGB / Normals / Depth</i> coloring directly on the lifted 3D points.</p>
       </div>
     </div>
   </div>
@@ -918,7 +941,9 @@
   </div>
 </footer>
 
+<script src="static/js/vendor/three.min.js"></script>
+<script src="static/js/vendor/OrbitControls.js"></script>
 <script src="static/js/demo_data.js?v=3"></script>
-<script src="static/js/main.js?v=20"></script>
+<script src="static/js/main.js?v=22"></script>
 </body>
 </html>

@@ -235,12 +235,39 @@ figcaption b { color: var(--ink); }
 .split { display: grid; grid-template-columns: 1.15fr .85fr; gap: 24px; align-items: stretch; }
 .split.even { grid-template-columns: 1fr 1fr; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: stretch; }
-.grid2.geo-split { grid-template-columns: .86fr 1.14fr; }
-#geo-card .chip { font-size: 11.2px; padding: 5px 9px; }
-#geo-card .chips { gap: 5px; }
-#geo-card .chiprow { gap: 6px; margin-bottom: 6px; }
-#geo-cmp { aspect-ratio: 4 / 3; max-height: 340px; margin-top: 6px; }
+.grid2.geo-split { grid-template-columns: .92fr 1.08fr; }
+#geo-card .chip, #pc3d-card .chip { font-size: 11.2px; padding: 5px 9px; }
+#geo-card .chips, #pc3d-card .chips { gap: 5px; }
+#geo-card .chiprow, #pc3d-card .chiprow { gap: 6px; margin-bottom: 8px; }
+#geo-cmp { aspect-ratio: 4 / 3; max-height: 360px; margin-top: 6px; }
 #geo-cmp > img, #geo-cmp .top > img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Interactive Three.js 3D Point Cloud Viewer */
+.pc3d-stage {
+  position: relative; flex: 1; min-height: 360px; border-radius: 10px; overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, #f8fafc 0%, #e9eff7 100%);
+  border: 1px solid var(--line); cursor: grab; user-select: none; touch-action: none;
+}
+.pc3d-stage:active { cursor: grabbing; }
+#pc3d-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pc3d-badge {
+  position: absolute; z-index: 2; pointer-events: none;
+  font: 600 10.8px/1 var(--mono); padding: 5px 9px; border-radius: 6px;
+  background: rgba(255, 255, 255, .86); color: var(--ink);
+  border: 1px solid var(--line); backdrop-filter: blur(6px);
+}
+.pc3d-badge.tl { top: 10px; left: 10px; }
+.pc3d-badge.br { bottom: 10px; right: 10px; color: var(--ink-soft); }
+.pc3d-size-pill {
+  position: absolute; bottom: 10px; left: 10px; z-index: 2;
+  display: inline-flex; align-items: center; gap: 7px;
+  font: 600 10.8px/1 var(--mono); padding: 4px 9px; border-radius: 6px;
+  background: rgba(255, 255, 255, .88); color: var(--ink-soft);
+  border: 1px solid var(--line); backdrop-filter: blur(6px);
+}
+.pc3d-size-pill input[type="range"] {
+  width: 66px; height: 4px; accent-color: var(--navy); cursor: pointer; margin: 0;
+}
 .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: stretch; }
 .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: stretch; }
 .split > *, .grid2 > *, .grid3 > *, .grid4 > *, .stats > *, .ideas > * { min-width: 0; }
