@@ -1608,13 +1608,54 @@
     ctx.fillText("— GT Camera Trajectory (Active)   -- Full Path", 10 * dpr, h - 10 * dpr);
   }
 
+  const expKeyHud = document.getElementById("exp-key-hud");
+  function buildKeyHud(el) {
+    if (!el) return;
+    el.innerHTML = `
+      <div class="key-cluster">
+        <div class="keycap blank"></div>
+        <div class="keycap" data-act="up">↑</div>
+        <div class="keycap blank"></div>
+        <div class="keycap" data-act="left">←</div>
+        <div class="keycap" data-act="down">↓</div>
+        <div class="keycap" data-act="right">→</div>
+      </div>
+      <div class="key-cluster">
+        <div class="keycap blank"></div>
+        <div class="keycap" data-act="W">W</div>
+        <div class="keycap blank"></div>
+        <div class="keycap" data-act="A">A</div>
+        <div class="keycap" data-act="S">S</div>
+        <div class="keycap" data-act="D">D</div>
+      </div>`;
+  }
+  function syncKeyHud(el, demo, t, dur, badgeEl) {
+    if (!demo) return;
+    const acts = demo.actions || [];
+    const nTurns = acts.length || 1;
+    const d = Math.max(0.1, dur || demo.duration || 16);
+    const p = Math.max(0, Math.min(0.9999, t / d));
+    const activeTurn = Math.min(nTurns - 1, Math.floor(p * nTurns));
+    const raw = acts[activeTurn] || "";
+    const parts = raw.split("+").map((s) => s.trim());
+    if (el) {
+      el.querySelectorAll(".keycap[data-act]").forEach((k) => {
+        k.classList.toggle("on", parts.includes(k.dataset.act));
+      });
+    }
+    if (badgeEl) {
+      badgeEl.textContent = `Turn ${activeTurn + 1} / ${nTurns} · ${raw}`;
+    }
+    return activeTurn;
+  }
+  buildKeyHud(expKeyHud);
+
   function updateExplorerTelemetry() {
     if (!expVid || !curExp) return;
     const dur = expVid.duration || curExp.duration || 16;
     const p = Math.max(0, Math.min(1, expVid.currentTime / dur));
     drawTraj(p);
-    const nTurns = (curExp.actions || []).length || 1;
-    const activeTurn = Math.min(nTurns - 1, Math.floor(p * nTurns));
+    const activeTurn = syncKeyHud(expKeyHud, curExp, expVid.currentTime, dur, null);
     expTurns.querySelectorAll(".turn-pill").forEach((el, i) => {
       el.classList.toggle("active", i === activeTurn);
     });
@@ -1646,6 +1687,7 @@
 
     expPrompt.textContent = demo.prompt;
     drawTraj(0);
+    syncKeyHud(expKeyHud, demo, 0, demo.duration, null);
   }
 
   if (expChips && explorerList.length) {
@@ -1893,6 +1935,13 @@
   const modalVid = document.getElementById("modal-vid");
   const modalCap = document.getElementById("modal-cap");
   const modalActs = document.getElementById("modal-acts");
+  const modalKeyHud = document.getElementById("modal-key-hud");
+  const modalTurnBadge = document.getElementById("modal-turn-badge");
+  let curModalDemo = null;
+  buildKeyHud(modalKeyHud);
+  modalVid?.addEventListener("timeupdate", () => {
+    if (curModalDemo) syncKeyHud(modalKeyHud, curModalDemo, modalVid.currentTime, modalVid.duration, modalTurnBadge);
+  });
 
   if (galGrid) {
     demos.forEach((d) => {
@@ -1912,7 +1961,9 @@
           <div class="s">[${(d.actions || []).join(" → ")}]</div>
         </div>`;
       card.addEventListener("click", () => {
+        curModalDemo = d;
         modalVid.src = d.video;
+        syncKeyHud(modalKeyHud, d, 0, d.duration, modalTurnBadge);
         modalVid.play().catch(() => {});
         modalCap.textContent = d.title;
         modalActs.textContent = `Actions: [${(d.actions || []).join(" → ")}] · ${d.prompt}`;
